@@ -63,7 +63,41 @@ Détail dans [QUESTIONS-OUVERTES.md](docs/QUESTIONS-OUVERTES.md#6-ce-qui-reste).
 région UE) + **Brevo** (e-mails transactionnels). Détail et contraintes serverless
 dans [PLAN.md §9](docs/PLAN.md#9-stack-technique).
 
+## Développement
+
+```
+npm install
+npm run dev              développement
+npm run build            build de production
+npm run lint             eslint
+npm run test             vitest
+npx prisma migrate dev   applique le schéma en base
+npx prisma db seed       charge le catalogue (docs/CATALOGUE.md)
+npm run gdpr:retention   purge/anonymisation RGPD — à planifier en cron (§10)
+```
+
+Copier `.env.example` en `.env` et renseigner les variables (Supabase, NextAuth,
+Brevo) avant de lancer `npm run dev`. Le premier compte administrateur se crée
+directement en base (`role: ADMIN`, `emailVerifiedAt` et `approvedAt` renseignés) :
+aucun compte n'est approuvé par défaut à l'inscription.
+
 ## Statut
 
-Phase de cadrage. Aucun code applicatif n'a encore été écrit : ce dépôt contient les
-spécifications.
+Application fonctionnelle de bout en bout (lots L0 à L8 du
+[PLAN.md §11](docs/PLAN.md#11-jalons)) : inscription avec vérification d'e-mail et
+approbation manuelle, configurateur multi-lignes avec prix en direct, moteur de
+calcul testé contre le cas de recette Ergosanté, génération et téléchargement du
+PDF, historique client et back-office (comptes, catalogue, import tarifaire,
+remises, transport, charte, devis).
+
+Le catalogue de départ ne couvre que les références dont le prix figure dans les
+documents de cadrage (Evermat MB, Stand, Turn, ML, Saniflex) — Evermat Walk et les
+références NBR/SBR sont créées mais désactivées, faute de prix de base documenté :
+à compléter par [l'import du tarif réel](docs/PLAN.md#7-back-office-dadministration).
+Les références recommandées pour les postes Mobile, Spécifique et Milieu humide
+sont provisoires, voir [QUESTIONS-OUVERTES.md §6](docs/QUESTIONS-OUVERTES.md#6-ce-qui-reste).
+
+Sans identifiants Supabase/Brevo réels, l'application fonctionne en mode dégradé
+documenté : les e-mails sont journalisés en console au lieu d'être envoyés, et le
+PDF est généré à la volée sans être stocké (voir `src/lib/auth/email.ts` et
+`src/app/api/quotes/[id]/pdf/route.ts`).

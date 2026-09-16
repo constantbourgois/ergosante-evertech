@@ -1,0 +1,271 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+//
+// Data model reference: docs/PLAN.md §5
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// Prisma 7: connection URLs live in prisma7.config.ts, not here.
+// PrismaClient itself connects via a driver adapter — see src/lib/db.ts.
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum WorkstationType {
+  FIXE
+  MOBILE
+  PIVOTANT
+  SPECIFIQUE
+  MILIEU_HUMIDE
+}
+
+enum SalesUnit {
+  SQM // au m², découpe sur mesure
+  UNIT // à la pièce, format standard
+  LINEAR_METER // au mètre linéaire (chant)
+}
+
+enum QuoteStatus {
+  BROUILLON
+  A_CONSULTER
+  EMIS
+  EXPIRE
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  role            Role      @default(CLIENT)
+  emailVerifiedAt DateTime? // adresse prouvée
+  approvedAt      DateTime? // accès autorisé par un administrateur
+  approvedBy      String?
+  rejectedAt      DateTime?
+  rejectedBy      String?
+  companyName     String?
+  phone           String?
+  lastLoginAt         DateTime?
+  deletionRequestedAt DateTime? // suppression à la demande — docs/PLAN.md §10
+
+  discountRateId String?
+  discountRate   DiscountRate? @relation(fields: [discountRateId], references: [id])
+
+  quotes    Quote[]
+  authTokens AuthToken[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Jetons de vérification d'e-mail et de réinitialisation de mot de passe :
+// à usage unique, expirants — docs/PLAN.md §4.1 et §10. Le jeton lui-même
+// n'est jamais stocké en clair, seul son hash l'est.
+model AuthToken {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+// Journal des modifications tarifaires — docs/PLAN.md §7 : qui a changé quel
+// prix et quand, pour expliquer un écart des mois plus tard.
+model TariffChangeLog {
+  id          String   @id @default(cuid())
+  entityType  String // "ProductVariant" | "ProductFamily" | "DiscountRate" | "ShippingBracket"
+  entityId    String
+  field       String
+  previousValue String?
+  newValue      String?
+  changedBy   String
+  changedAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
+
+model ProductFamily {
+  id          String @id @default(cuid())
+  code        String @unique
+  name        String
+  description String
+  imageUrl    String?
+
+  workstationType WorkstationType
+  isRecommended   Boolean @default(false)
+
+  thicknessMm Int
+  colorLabel  String
+
+  supportsESD    Boolean @default(false)
+  supportsB1     Boolean @default(false)
+  supportsEdging Boolean @default(false)
+
+  minCutCm      Int     @default(60)
+  maxCutWidthCm Int? // nullable ; vide = pas de limite (⚠️ à confirmer)
+
+  isActive Boolean @default(true)
+
+  variants ProductVariant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductVariant {
+  id        String @id @default(cuid())
+  reference String @unique // 10101, 10101ESDB1, 20102SBRU…
+
+  familyId String
+  family   ProductFamily @relation(fields: [familyId], references: [id])
+
+  hasESD Boolean @default(false)
+  hasB1  Boolean @default(false)
+
+  salesUnit SalesUnit
+
+  // Uniquement si salesUnit == UNIT (65×95, 91×152)
+  standardLengthCm Int?
+  standardWidthCm  Int?
+
+  salePrice Decimal @db.Decimal(10, 2) // €/m², €/pièce ou €/ml selon salesUnit
+  weight    Decimal @db.Decimal(10, 3) // kg/m² si SQM, kg/pièce si UNIT
+  // La colonne « V.A » (prix d'achat) du tarif n'est jamais importée — docs/PLAN.md §10.
+
+  isActive Boolean @default(true)
+
+  quoteLines QuoteLine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DiscountRate {
+  id                 String   @id @default(cuid())
+  name               String
+  percentage         Decimal  @db.Decimal(5, 2)
+  appliesToTransport Boolean  @default(false)
+  validFrom          DateTime?
+  validUntil         DateTime?
+
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ShippingZone {
+  id   String @id @default(cuid())
+  name String @unique // "France" seule zone alimentée
+
+  brackets ShippingBracket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ShippingBracket {
+  id          String  @id @default(cuid())
+  zoneId      String
+  zone        ShippingZone @relation(fields: [zoneId], references: [id])
+  maxWeightKg Decimal @db.Decimal(10, 2)
+  flatPrice   Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([zoneId, maxWeightKg])
+}
+
+model Quote {
+  id        String      @id @default(cuid())
+  reference String      @unique
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  status    QuoteStatus @default(BROUILLON)
+
+  subtotal       Decimal  @db.Decimal(10, 2)
+  discountAmount Decimal  @db.Decimal(10, 2)
+  // Nuls quand le devis bascule en A_CONSULTER (> 40 kg) : aucun total n'est
+  // jamais affiché sur un devis non chiffrable — docs/PLAN.md §6.4.
+  shippingCost   Decimal? @db.Decimal(10, 2)
+  totalHT        Decimal? @db.Decimal(10, 2)
+  taxAmount      Decimal? @db.Decimal(10, 2)
+  total          Decimal? @db.Decimal(10, 2) // total TTC
+
+  vatRate       Decimal   @db.Decimal(5, 2) @default(20)
+  validUntil    DateTime
+  totalWeightKg Decimal   @db.Decimal(10, 3)
+
+  pdfUrl String?
+
+  // Copie figée des tarifs employés au moment du calcul — un devis émis doit
+  // rester lisible après une hausse tarifaire, voir docs/PLAN.md §5.2.
+  pricingSnapshot Json
+
+  lines QuoteLine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuoteLine {
+  id      String @id @default(cuid())
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  variantId               String
+  variant                 ProductVariant @relation(fields: [variantId], references: [id])
+  variantReferenceSnapshot String
+
+  quantity      Int
+  lengthCm      Int
+  widthCm       Int
+  unitAreaSqm   Decimal @db.Decimal(10, 4)
+  totalAreaSqm  Decimal @db.Decimal(10, 4)
+
+  hasEdging          Boolean @default(false)
+  edgingLinearMeters Decimal? @db.Decimal(10, 2)
+  edgingPrice        Decimal? @db.Decimal(10, 2)
+
+  unitPrice   Decimal @db.Decimal(10, 2)
+  lineTotal   Decimal @db.Decimal(10, 2)
+  lineWeightKg Decimal @db.Decimal(10, 3)
+
+  createdAt DateTime @default(now())
+}
+
+model BrandingSettings {
+  id String @id @default(cuid())
+
+  logoUrl        String?
+  primaryColor   String
+  secondaryColor String
+  fontFamily     String
+
+  companyAddress String
+  legalMentions  String
+  quoteFooter    String?
+
+  quoteValidityDays Int     @default(30)
+  defaultVatRate    Decimal @db.Decimal(5, 2) @default(20)
+  leadTimeLabel     String  @default("2 à 3 semaines")
+
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Quote" ADD COLUMN     "totalHT" DECIMAL(10,2),
+ALTER COLUMN "shippingCost" DROP NOT NULL,
+ALTER COLUMN "taxAmount" DROP NOT NULL,
+ALTER COLUMN "total" DROP NOT NULL;
