@@ -40,6 +40,11 @@ enum QuoteStatus {
   EXPIRE
 }
 
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
@@ -48,15 +53,51 @@ model User {
   emailVerifiedAt DateTime? // adresse prouvée
   approvedAt      DateTime? // accès autorisé par un administrateur
   approvedBy      String?
+  rejectedAt      DateTime?
+  rejectedBy      String?
   companyName     String?
   phone           String?
+  lastLoginAt         DateTime?
+  deletionRequestedAt DateTime? // suppression à la demande — docs/PLAN.md §10
 
   discountRateId String?
   discountRate   DiscountRate? @relation(fields: [discountRateId], references: [id])
 
   quotes    Quote[]
+  authTokens AuthToken[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Jetons de vérification d'e-mail et de réinitialisation de mot de passe :
+// à usage unique, expirants — docs/PLAN.md §4.1 et §10. Le jeton lui-même
+// n'est jamais stocké en clair, seul son hash l'est.
+model AuthToken {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+// Journal des modifications tarifaires — docs/PLAN.md §7 : qui a changé quel
+// prix et quand, pour expliquer un écart des mois plus tard.
+model TariffChangeLog {
+  id          String   @id @default(cuid())
+  entityType  String // "ProductVariant" | "ProductFamily" | "DiscountRate" | "ShippingBracket"
+  entityId    String
+  field       String
+  previousValue String?
+  newValue      String?
+  changedBy   String
+  changedAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
 }
 
 model ProductFamily {
@@ -159,11 +200,14 @@ model Quote {
   user      User        @relation(fields: [userId], references: [id])
   status    QuoteStatus @default(BROUILLON)
 
-  subtotal       Decimal @db.Decimal(10, 2)
-  discountAmount Decimal @db.Decimal(10, 2)
-  shippingCost   Decimal @db.Decimal(10, 2)
-  taxAmount      Decimal @db.Decimal(10, 2)
-  total          Decimal @db.Decimal(10, 2)
+  subtotal       Decimal  @db.Decimal(10, 2)
+  discountAmount Decimal  @db.Decimal(10, 2)
+  // Nuls quand le devis bascule en A_CONSULTER (> 40 kg) : aucun total n'est
+  // jamais affiché sur un devis non chiffrable — docs/PLAN.md §6.4.
+  shippingCost   Decimal? @db.Decimal(10, 2)
+  totalHT        Decimal? @db.Decimal(10, 2)
+  taxAmount      Decimal? @db.Decimal(10, 2)
+  total          Decimal? @db.Decimal(10, 2) // total TTC
 
   vatRate       Decimal   @db.Decimal(5, 2) @default(20)
   validUntil    DateTime

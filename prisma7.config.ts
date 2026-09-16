@@ -7,6 +7,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts",
   },
   // Used by `prisma migrate` / `prisma db pull` — the direct (non-pooled)
   // connection, required on Vercel's serverless runtime (docs/PLAN.md §9.1).
