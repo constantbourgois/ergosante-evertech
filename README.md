@@ -63,7 +63,21 @@ Détail dans [QUESTIONS-OUVERTES.md](docs/QUESTIONS-OUVERTES.md#6-ce-qui-reste).
 région UE) + **Brevo** (e-mails transactionnels). Détail et contraintes serverless
 dans [PLAN.md §9](docs/PLAN.md#9-stack-technique).
 
+## Développement
+
+```
+npm install
+npm run dev       développement
+npm run build     build de production
+npm run lint      eslint
+```
+
+Copier `.env.example` en `.env` et renseigner les variables (Supabase, NextAuth,
+Brevo) avant de lancer `npm run dev`.
+
 ## Statut
 
-Phase de cadrage. Aucun code applicatif n'a encore été écrit : ce dépôt contient les
-spécifications.
+Socle applicatif initialisé (Next.js 16, TypeScript, Tailwind CSS 4, Prisma 7 —
+schéma de données du [PLAN.md §5](docs/PLAN.md#5-modèle-de-données)). Comptes,
+configurateur, moteur de calcul et back-office restent à développer — voir les
+jalons du [PLAN.md §11](docs/PLAN.md#11-jalons).
