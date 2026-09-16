@@ -57,6 +57,12 @@ Aucun bloquant : les développements peuvent démarrer.
 
 Détail dans [QUESTIONS-OUVERTES.md](docs/QUESTIONS-OUVERTES.md#6-ce-qui-reste).
 
+## Infrastructure
+
+**Vercel** (hébergement, région UE) + **Supabase** (Postgres et stockage des PDF,
+région UE) + **Brevo** (e-mails transactionnels). Détail et contraintes serverless
+dans [PLAN.md §9](docs/PLAN.md#9-stack-technique).
+
 ## Statut
 
 Phase de cadrage. Aucun code applicatif n'a encore été écrit : ce dépôt contient les

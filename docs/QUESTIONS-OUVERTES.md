@@ -188,27 +188,41 @@ C'est la convention de facturation française usuelle, et celle qui rend le PDF
 vérifiable à la calculette par le client — un total qui ne retombe pas sur la somme
 des lignes génère des appels au service client.
 
-### 5.4 Bibliothèque PDF (question #24) — *proposition : `@react-pdf/renderer`*
+### 5.4 Bibliothèque PDF (question #24) — ✅ **`@react-pdf/renderer`**
 
-Rendu serveur en Node, sans navigateur sans tête. Sur Render, c'est l'argument
-décisif : une solution HTML → PDF (Puppeteer, Playwright) impose d'embarquer Chromium,
-soit plusieurs centaines de Mo d'image et un pic mémoire à chaque génération, pour un
-document qui reste une mise en page fixe. `@react-pdf/renderer` s'écrit en composants
-React, donc dans le même langage que le reste du projet, et la charte de
-`BrandingSettings` s'y injecte comme des props.
+Rendu serveur en Node, sans navigateur sans tête, en composants React — donc dans le
+même langage que le reste du projet, la charte de `BrandingSettings` s'y injectant
+comme des props.
+
+L'arbitrage hébergement l'a renforcé : sur Vercel, les fonctions serverless sont
+plafonnées à 250 Mo décompressés, et Puppeteer n'y tient qu'au prix d'une build
+spéciale de Chromium — pour un document à mise en page fixe qui n'en a aucun besoin.
 
 *Réserve* : la fidélité typographique y est moins fine qu'en HTML. Si le devis doit
-reproduire au pixel près un modèle graphique existant, il faudra rebasculer sur
-Chromium — à dire maintenant, la migration coûte cher après.
+reproduire au pixel près un modèle graphique existant, il faudra du HTML → PDF, ce qui
+sur Vercel signifie probablement sortir la génération vers un service dédié. À trancher
+maintenant : la migration coûte cher après.
 
-### 5.5 Stockage des PDF (question #25) — *proposition : stockage objet S3 privé*
+### 5.5 Stockage des PDF (question #25) — ✅ **Supabase Storage**
 
-Le disque d'une instance Render n'est pas un stockage durable. Proposition :
-**Cloudflare R2** ou **Scaleway Object Storage** (données hébergées dans l'UE),
-bucket **privé**, accès par URL signée à durée courte générée à la demande.
+Bucket **privé**, accès par URL signée à durée courte (`createSignedUrl`), générée côté
+serveur après vérification que le devis appartient bien au client connecté.
 
-Un bucket public exposerait les devis de tous vos clients à qui devinerait une URL :
-ce sont des documents nominatifs et tarifés, donc jamais en accès direct.
+Trois raisons : l'endpoint est compatible S3, donc le code reste portable vers R2 ou
+Scaleway si besoin ; les régions européennes couvrent l'exigence RGPD ; et la
+volumétrie est sans enjeu — un devis pèse 100 à 300 Ko, le premier palier couvre
+plusieurs milliers de devis.
+
+Deux précautions, l'une et l'autre par défaut mais modifiables en un clic :
+
+- **Le bucket doit être privé.** Public, il exposerait les devis nominatifs et tarifés
+  de tous vos clients à qui devinerait une URL.
+- **La clé `service_role` reste côté serveur.** Elle contourne les règles d'accès :
+  exposée au navigateur, elle donne accès à tous les devis. Jamais dans une variable
+  `NEXT_PUBLIC_`.
+
+⚠️ **La région Supabase se choisit à la création du projet et ne se change pas
+ensuite.** À fixer en UE avant toute autre chose.
 
 ### 5.6 Conservation des devis (question #26) — *proposition*
 

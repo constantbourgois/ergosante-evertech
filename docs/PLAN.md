@@ -413,27 +413,65 @@ Deux exigences transverses :
 
 ## 9. Stack technique
 
-Aligner ce projet sur celui déjà en production chez le même éditeur
-(`boplan-riashop-app`) évite d'entretenir deux écosystèmes.
+Les briques applicatives reprennent celles de `boplan-riashop-app` ; l'infrastructure,
+elle, s'en écarte : **Vercel** pour l'hébergement et **Supabase** pour la base et le
+stockage, là où le projet frère est sur Render.
 
 | Domaine | Choix |
 | --- | --- |
 | Framework | Next.js 16 (App Router), React 19, TypeScript |
-| Base de données | PostgreSQL + Prisma 7 |
+| **Hébergement** | **Vercel**, région de fonction en UE (`cdg1` Paris ou `fra1` Francfort) |
+| **Base de données** | **Supabase Postgres** (région UE) + Prisma 7 |
+| **Stockage des PDF** | **Supabase Storage**, bucket privé, URL signées |
 | Authentification | NextAuth v5 (credentials + vérification e-mail + approbation) |
 | UI | Tailwind CSS 4 + shadcn / Base UI |
 | Import tarifaire | `xlsx` (déjà employé sur le projet frère) |
 | E-mails transactionnels | **Brevo** |
 | PDF | **`@react-pdf/renderer`** |
-| Stockage des PDF | **Cloudflare R2 ou Scaleway Object Storage**, bucket privé, URL signées |
 | Tests | Vitest |
-| Hébergement | Render |
 
-Le choix de `@react-pdf/renderer` plutôt qu'un rendu HTML → PDF tient à
-l'hébergement : Puppeteer imposerait d'embarquer Chromium, soit plusieurs centaines
-de Mo et un pic mémoire à chaque génération, pour un document à mise en page fixe.
-⚠️ Réserve : si le devis doit reproduire au pixel près un modèle graphique existant,
-il faudra rebasculer sur Chromium — à dire maintenant, la migration coûte cher après.
+Deux fournisseurs plutôt que trois : Supabase porte la base **et** le stockage. ⚠️ Si
+la base doit rester ailleurs (Neon, Render), seule la chaîne de connexion change — le
+reste du plan tient.
+
+### 9.1 Trois contraintes propres au serverless
+
+Passer de Render à Vercel n'est pas un simple changement d'hébergeur : l'exécution
+devient serverless, ce qui impose trois précautions à traiter dès le lot L0.
+
+**Le système de fichiers est éphémère.** Aucun PDF ne peut être écrit sur disque : le
+stockage objet n'est pas un confort, c'est la seule option. Ce que le plan prévoyait
+déjà (§8), mais qui devient non négociable.
+
+**Prisma a besoin d'un pooler.** Chaque invocation de fonction ouvre sa propre
+connexion ; sous charge, Postgres sature. Il faut donc deux chaînes de connexion :
+
+```
+DATABASE_URL       → connexion poolée Supabase (pgBouncer, mode transaction, port 6543)
+DIRECT_URL         → connexion directe (port 5432), pour les migrations Prisma
+```
+
+`directUrl` se déclare dans `schema.prisma` — sans lui, `prisma migrate` échoue à
+travers le pooler. C'est une erreur classique, et elle ne se manifeste qu'au premier
+déploiement.
+
+**Les régions doivent être alignées.** Fonctions Vercel et projet Supabase dans la
+même région européenne. À défaut, chaque requête traverse l'Atlantique — latence
+inutile, et argumentaire RGPD affaibli. La région Supabase **se choisit à la création
+du projet et ne se change pas ensuite**.
+
+### 9.2 Pourquoi `@react-pdf/renderer` — l'argument se renforce
+
+Ce choix tenait, sur Render, au poids de Chromium. Sur Vercel il devient presque
+obligatoire : les fonctions serverless sont plafonnées à 250 Mo décompressés, et
+Puppeteer n'y tient qu'au prix d'une build spéciale de Chromium, pour un document à
+mise en page fixe qui n'en a aucun besoin. `@react-pdf/renderer` est du JavaScript
+pur, sans binaire, et génère un devis en bien moins d'une seconde.
+
+⚠️ Réserve inchangée : si le devis doit reproduire au pixel près un modèle graphique
+existant, il faudra du HTML → PDF — et sur Vercel, cela signifie probablement sortir
+la génération vers un service dédié. À trancher maintenant, la migration coûte cher
+après.
 
 > ⚠️ **Avant d'écrire la moindre ligne de code** : cette version de Next.js s'écarte
 > des conventions antérieures. Lire les guides de `node_modules/next/dist/docs/` et
@@ -472,8 +510,14 @@ retourne un devis calculé. C'est la condition pour le tester sérieusement.
 - Routes d'administration protégées par contrôle de rôle côté serveur.
 - Prix recalculés côté serveur avant émission : jamais de tarif faisant autorité
   depuis le navigateur.
-- PDF en bucket **privé**, accès par URL signée à durée courte. Un bucket public
-  exposerait les devis nominatifs de tous vos clients à qui devinerait une URL.
+- PDF en bucket Supabase **privé**, accès par URL signée à durée courte
+  (`createSignedUrl`), générée côté serveur après vérification que le devis appartient
+  bien au client connecté. Un bucket public exposerait les devis nominatifs de tous vos
+  clients à qui devinerait une URL — et le réglage se change en un clic, donc à vérifier.
+- **La clé `service_role` de Supabase ne quitte jamais le serveur.** Elle contourne les
+  règles d'accès : exposée au navigateur, elle donne accès à tous les devis de tous les
+  clients. Jamais dans un composant client, jamais dans une variable préfixée
+  `NEXT_PUBLIC_`. C'est le principal risque de cette brique.
 
 > **La colonne « V.A » n'est pas importée.** Décision prise de laisser les prix
 > d'achat hors de l'application : ils n'y servent à rien puisque le devis ne les
@@ -494,7 +538,7 @@ par votre conseil.
 
 | Lot | Contenu | Livrable |
 | --- | --- | --- |
-| **L0 — Socle** | Initialisation Next.js, Prisma, schéma, CI, déploiement | Application vide déployée |
+| **L0 — Socle** | Initialisation Next.js, Prisma, schéma, CI, **pooler et régions UE (§9.1)**, déploiement Vercel | Application vide déployée |
 | **L1 — Comptes** | Inscription, vérification Brevo, **approbation manuelle**, connexion, mot de passe oublié, rôles | Un client approuvé se connecte |
 | **L2 — Catalogue** | CRUD familles et références, **import du tarif**, types de poste, options, formats | Le tarif réel est en base |
 | **L3 — Moteur de calcul** | `lib/pricing` : résolveur + calcul + arrondis + jeu de tests | Calcul validé contre des devis existants |
