@@ -10,6 +10,7 @@ import {
   type WorkstationType,
 } from "./types";
 import { formatEUR } from "./format-currency";
+import { StepIndicator } from "./StepIndicator";
 
 const WORKSTATION_ORDER: WorkstationType[] = [
   "FIXE",
@@ -18,6 +19,16 @@ const WORKSTATION_ORDER: WorkstationType[] = [
   "SPECIFIQUE",
   "MILIEU_HUMIDE",
 ];
+
+const STEPS = [
+  { id: 0, label: "Type de poste" },
+  { id: 1, label: "Modèle" },
+  { id: 2, label: "Configuration" },
+  { id: 3, label: "Résumé" },
+  { id: 4, label: "Aperçu" },
+] as const;
+
+type StepId = typeof STEPS[number]["id"];
 
 function newLineDraft(family: CatalogFamily): DraftLine {
   return {
@@ -36,6 +47,7 @@ function newLineDraft(family: CatalogFamily): DraftLine {
 export default function ConfiguratorApp() {
   const router = useRouter();
   const [families, setFamilies] = useState<CatalogFamily[] | null>(null);
+  const [currentStep, setCurrentStep] = useState<StepId>(0);
   const [workstationType, setWorkstationType] = useState<WorkstationType>("FIXE");
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
   const [draft, setDraft] = useState<DraftLine | null>(null);
@@ -155,238 +167,364 @@ export default function ConfiguratorApp() {
     router.push(`/devis/${body.quote.id}`);
   }
 
+  function canAdvanceStep(): boolean {
+    switch (currentStep) {
+      case 0:
+        return workstationType !== null;
+      case 1:
+        return selectedFamily !== null;
+      case 2:
+        return draft !== null && lines.length + 1 >= 1;
+      case 3:
+        return lines.length > 0;
+      case 4:
+        return preview !== null;
+      default:
+        return true;
+    }
+  }
+
+  function nextStep() {
+    if (canAdvanceStep() && currentStep < STEPS.length - 1) {
+      setCurrentStep((currentStep + 1) as StepId);
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 0) {
+      setCurrentStep((currentStep - 1) as StepId);
+    }
+  }
+
   if (!families) {
     return <p className="px-6 py-12">Chargement du catalogue…</p>;
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
-      <h1 className="text-2xl font-semibold">Nouveau devis</h1>
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10">
+      <div>
+        <h1 className="text-2xl font-semibold">Nouveau devis</h1>
+      </div>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium">1. Type de poste de travail</h2>
-        <div className="flex flex-wrap gap-2">
-          {WORKSTATION_ORDER.map((type) => (
-            <button
-              key={type}
-              onClick={() => {
-                setWorkstationType(type);
-                setSelectedFamilyId(null);
-              }}
-              className={`rounded-full border px-4 py-1.5 text-sm ${
-                workstationType === type
-                  ? "border-brand-yellow bg-brand-yellow text-brand-black"
-                  : "border-zinc-300"
-              }`}
-            >
-              {WORKSTATION_LABELS[type]}
-            </button>
-          ))}
-        </div>
-      </section>
+      <div className="px-2">
+        <StepIndicator steps={STEPS} currentStep={currentStep} onStepClick={setCurrentStep} />
+      </div>
 
-      {selectedFamily ? (
-        <>
-          <section className="flex flex-col gap-3">
-            <h2 className="text-lg font-medium">2. Modèle</h2>
-            <div className="flex flex-wrap gap-3">
+      <div className="min-h-96">
+        {currentStep === 0 && (
+          <section className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-lg font-medium mb-2">{STEPS[0].label}</h2>
+              <p className="text-sm text-zinc-500">Quel type de poste de travail ?</p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {WORKSTATION_ORDER.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setWorkstationType(type);
+                    setSelectedFamilyId(null);
+                  }}
+                  className={`rounded-lg border-2 px-4 py-4 text-left transition ${
+                    workstationType === type
+                      ? "border-brand-yellow bg-brand-yellow/10"
+                      : "border-zinc-200 hover:border-brand-yellow"
+                  }`}
+                >
+                  <div className="font-medium">{WORKSTATION_LABELS[type]}</div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {currentStep === 1 && (
+          <section className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-lg font-medium mb-2">{STEPS[1].label}</h2>
+              <p className="text-sm text-zinc-500">Quel produit EVERMAT ?</p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {familiesForWorkstation.map((family) => (
                 <button
                   key={family.id}
                   onClick={() => setSelectedFamilyId(family.id)}
-                  className={`flex flex-col gap-1 rounded border px-4 py-3 text-left text-sm ${
+                  className={`flex flex-col gap-2 rounded-lg border-2 px-4 py-4 text-left transition ${
                     family.id === selectedFamilyId
-                      ? "border-brand-yellow"
-                      : "border-zinc-300"
+                      ? "border-brand-yellow bg-brand-yellow/10"
+                      : "border-zinc-200 hover:border-brand-yellow"
                   }`}
                 >
-                  <span className="font-medium">
-                    {family.name} {family.isRecommended ? "· Recommandé" : ""}
-                  </span>
-                  <span className="text-zinc-500">{family.description}</span>
-                  <span className="text-zinc-500">
+                  <div className="font-medium">{family.name}</div>
+                  <div className="text-sm text-zinc-500">{family.description}</div>
+                  <div className="text-xs text-zinc-400">
                     {family.thicknessMm} mm · {family.colorLabel}
-                  </span>
+                    {family.isRecommended ? " · Recommandé" : ""}
+                  </div>
                 </button>
               ))}
-              {familiesForWorkstation.length === 0 ? (
-                <p className="text-sm text-zinc-500">
-                  Aucun modèle disponible pour ce type de poste pour le moment.
+              {familiesForWorkstation.length === 0 && (
+                <p className="text-sm text-zinc-500 col-span-full">
+                  Aucun modèle disponible pour ce type de poste.
                 </p>
-              ) : null}
+              )}
             </div>
           </section>
+        )}
 
-          {draft ? (
-            <section className="flex flex-col gap-4">
-              <h2 className="text-lg font-medium">3–5. Quantité, dimensions, options</h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <label className="flex flex-col gap-1 text-sm">
-                  Quantité
-                  <input
-                    type="number"
-                    min={1}
-                    value={draft.quantity}
-                    onChange={(e) =>
-                      setDraft({ ...draft, quantity: Number(e.target.value) || 1 })
-                    }
-                    className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
-                  />
-                </label>
-                <label className="flex flex-col gap-1 text-sm">
-                  Longueur (cm)
-                  <input
-                    type="number"
-                    min={selectedFamily.minCutCm}
-                    value={draft.lengthCm}
-                    onChange={(e) =>
-                      setDraft({ ...draft, lengthCm: Number(e.target.value) || 0 })
-                    }
-                    className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
-                  />
-                </label>
-                <label className="flex flex-col gap-1 text-sm">
-                  Largeur (cm)
-                  <input
-                    type="number"
-                    min={selectedFamily.minCutCm}
-                    max={selectedFamily.maxCutWidthCm ?? undefined}
-                    value={draft.widthCm}
-                    onChange={(e) =>
-                      setDraft({ ...draft, widthCm: Number(e.target.value) || 0 })
-                    }
-                    className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
-                  />
-                </label>
-              </div>
-              <p className="text-xs text-zinc-500">
-                Minimum {selectedFamily.minCutCm} cm sur chaque côté
-                {selectedFamily.maxCutWidthCm
-                  ? `, largeur maximale ${selectedFamily.maxCutWidthCm} cm`
-                  : ", aucune longueur maximale"}
-                {selectedFamily.hasStandardFormat
-                  ? ". Un format standard est automatiquement retenu s'il correspond exactement à vos dimensions."
-                  : ""}
-              </p>
+        {currentStep === 2 && draft && (
+          <section className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-lg font-medium mb-2">{STEPS[2].label}</h2>
+              <p className="text-sm text-zinc-500">{selectedFamily?.name}</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Quantité</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={draft.quantity}
+                  onChange={(e) =>
+                    setDraft({ ...draft, quantity: Number(e.target.value) || 1 })
+                  }
+                  className="rounded border-2 border-zinc-200 px-3 py-2 focus:border-brand-yellow focus:outline-none"
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Longueur (cm)</span>
+                <input
+                  type="number"
+                  min={selectedFamily?.minCutCm}
+                  value={draft.lengthCm}
+                  onChange={(e) =>
+                    setDraft({ ...draft, lengthCm: Number(e.target.value) || 0 })
+                  }
+                  className="rounded border-2 border-zinc-200 px-3 py-2 focus:border-brand-yellow focus:outline-none"
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Largeur (cm)</span>
+                <input
+                  type="number"
+                  min={selectedFamily?.minCutCm}
+                  max={selectedFamily?.maxCutWidthCm ?? undefined}
+                  value={draft.widthCm}
+                  onChange={(e) =>
+                    setDraft({ ...draft, widthCm: Number(e.target.value) || 0 })
+                  }
+                  className="rounded border-2 border-zinc-200 px-3 py-2 focus:border-brand-yellow focus:outline-none"
+                />
+              </label>
+            </div>
+            <p className="text-xs text-zinc-500">
+              Minimum {selectedFamily?.minCutCm} cm
+              {selectedFamily?.maxCutWidthCm ? ` · Largeur max ${selectedFamily.maxCutWidthCm} cm` : ""}
+            </p>
 
-              <div className="flex flex-wrap gap-6">
-                <label
-                  title={!selectedFamily.supportsESD ? "Non disponible sur ce modèle" : undefined}
-                  className={`flex items-center gap-2 text-sm ${!selectedFamily.supportsESD ? "opacity-40" : ""}`}
-                >
+            <div className="space-y-3">
+              {selectedFamily?.supportsESD && (
+                <label className="flex items-center gap-3 rounded border border-zinc-200 p-3 hover:bg-zinc-50">
                   <input
                     type="checkbox"
-                    disabled={!selectedFamily.supportsESD}
                     checked={draft.hasESD}
                     onChange={(e) => setDraft({ ...draft, hasESD: e.target.checked })}
+                    className="rounded"
                   />
-                  ESD — dissipation électrostatique
+                  <div>
+                    <div className="text-sm font-medium">ESD</div>
+                    <div className="text-xs text-zinc-500">Dissipation électrostatique</div>
+                  </div>
                 </label>
-                <label
-                  title={!selectedFamily.supportsB1 ? "Non disponible sur ce modèle" : undefined}
-                  className={`flex items-center gap-2 text-sm ${!selectedFamily.supportsB1 ? "opacity-40" : ""}`}
-                >
+              )}
+              {selectedFamily?.supportsB1 && (
+                <label className="flex items-center gap-3 rounded border border-zinc-200 p-3 hover:bg-zinc-50">
                   <input
                     type="checkbox"
-                    disabled={!selectedFamily.supportsB1}
                     checked={draft.hasB1}
                     onChange={(e) => setDraft({ ...draft, hasB1: e.target.checked })}
+                    className="rounded"
                   />
-                  B1 — résistance au feu (DIN 4102-1)
+                  <div>
+                    <div className="text-sm font-medium">B1</div>
+                    <div className="text-xs text-zinc-500">Résistance au feu (DIN 4102-1)</div>
+                  </div>
                 </label>
-                <label
-                  title={!selectedFamily.supportsEdging ? "Non disponible sur ce modèle" : undefined}
-                  className={`flex items-center gap-2 text-sm ${!selectedFamily.supportsEdging ? "opacity-40" : ""}`}
-                >
+              )}
+              {selectedFamily?.supportsEdging && (
+                <label className="flex items-center gap-3 rounded border border-zinc-200 p-3 hover:bg-zinc-50">
                   <input
                     type="checkbox"
-                    disabled={!selectedFamily.supportsEdging}
                     checked={draft.hasEdging}
                     onChange={(e) => setDraft({ ...draft, hasEdging: e.target.checked })}
+                    className="rounded"
                   />
-                  Chant jaune 5 cm (périmètre complet)
+                  <div>
+                    <div className="text-sm font-medium">Chant jaune</div>
+                    <div className="text-xs text-zinc-500">5 cm sur le périmètre complet</div>
+                  </div>
                 </label>
+              )}
+            </div>
+
+            {previewError && <p className="text-sm text-red-600">{previewError}</p>}
+
+            <button
+              onClick={addLine}
+              className="self-start rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark"
+            >
+              Ajouter cette ligne
+            </button>
+
+            {lines.length > 0 && preview && (
+              <div className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-4">
+                <h3 className="mb-3 text-sm font-medium">Aperçu du devis</h3>
+                <table className="w-full text-xs">
+                  <tbody className="divide-y">
+                    <tr>
+                      <td className="py-1">Sous-total</td>
+                      <td className="text-right">{formatEUR(preview.subtotal)}</td>
+                    </tr>
+                    {preview.discountAmount > 0 && (
+                      <tr>
+                        <td className="py-1">Remise</td>
+                        <td className="text-right text-green-600">
+                          − {formatEUR(preview.discountAmount)}
+                        </td>
+                      </tr>
+                    )}
+                    <tr className="font-medium">
+                      <td className="py-1">Total HT</td>
+                      <td className="text-right">{formatEUR(preview.totalHT ?? 0)}</td>
+                    </tr>
+                    <tr className="font-semibold">
+                      <td className="py-1">Total TTC</td>
+                      <td className="text-right">{formatEUR(preview.totalTTC ?? 0)}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+            )}
+          </section>
+        )}
 
-              {previewError ? <p className="text-sm text-red-600">{previewError}</p> : null}
+        {currentStep === 3 && (
+          <section className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-lg font-medium mb-2">{STEPS[3].label}</h2>
+              <p className="text-sm text-zinc-500">{lines.length} ligne{lines.length > 1 ? "s" : ""}</p>
+            </div>
+            <div className="space-y-2">
+              {lines.map((line) => (
+                <div
+                  key={line.key}
+                  className="flex items-center justify-between rounded border border-zinc-200 px-4 py-3"
+                >
+                  <div className="text-sm">
+                    <div className="font-medium">{line.familyLabel}</div>
+                    <div className="text-zinc-500">
+                      {line.quantity} × {line.lengthCm}×{line.widthCm} cm
+                      {line.hasESD ? " · ESD" : ""}
+                      {line.hasB1 ? " · B1" : ""}
+                      {line.hasEdging ? " · Chant" : ""}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeLine(line.key)}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    Retirer
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-              <button
-                onClick={addLine}
-                className="self-start rounded border-2 border-brand-black px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-black hover:text-brand-yellow"
-              >
-                Ajouter cette ligne
-              </button>
-            </section>
-          ) : null}
-        </>
-      ) : null}
+        {currentStep === 4 && preview && (
+          <section className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-lg font-medium mb-2">{STEPS[4].label}</h2>
+            </div>
+            {preview.status === "A_CONSULTER" ? (
+              <div className="rounded bg-amber-50 p-4 text-amber-800">
+                <p className="text-sm font-medium">Configuration consultée</p>
+                <p className="text-sm">
+                  Cette configuration dépasse 40 kg ({preview.totalWeightKg.toFixed(2)} kg).
+                  Notre service client vous recontactera.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <table className="w-full text-sm">
+                  <tbody className="divide-y">
+                    <tr>
+                      <td className="py-2">Sous-total</td>
+                      <td className="text-right">{formatEUR(preview.subtotal)}</td>
+                    </tr>
+                    {preview.discountAmount > 0 && (
+                      <tr>
+                        <td className="py-2">Remise</td>
+                        <td className="text-right text-green-600">
+                          − {formatEUR(preview.discountAmount)}
+                        </td>
+                      </tr>
+                    )}
+                    <tr>
+                      <td className="py-2">Transport</td>
+                      <td className="text-right">{formatEUR(preview.shippingCost ?? 0)}</td>
+                    </tr>
+                    <tr className="font-medium">
+                      <td className="py-2">Total HT</td>
+                      <td className="text-right">{formatEUR(preview.totalHT ?? 0)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2">TVA (20 %)</td>
+                      <td className="text-right">{formatEUR(preview.taxAmount ?? 0)}</td>
+                    </tr>
+                    <tr className="font-semibold">
+                      <td className="py-2">Total TTC</td>
+                      <td className="text-right">{formatEUR(preview.totalTTC ?? 0)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="text-xs text-zinc-500">Validité 1 mois · Délai 2 à 3 semaines</p>
+              </div>
+            )}
+            {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+          </section>
+        )}
+      </div>
 
-      {lines.length > 0 ? (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-medium">6. Lignes du devis</h2>
-          <ul className="flex flex-col gap-2">
-            {lines.map((line) => (
-              <li
-                key={line.key}
-                className="flex items-center justify-between rounded border border-zinc-200 px-4 py-2 text-sm"
-              >
-                <span>
-                  {line.familyLabel} — {line.quantity} × {line.lengthCm}×{line.widthCm} cm
-                  {line.hasESD ? " · ESD" : ""}
-                  {line.hasB1 ? " · B1" : ""}
-                  {line.hasEdging ? " · Chant" : ""}
-                </span>
-                <button onClick={() => removeLine(line.key)} className="text-red-600 underline">
-                  Retirer
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {preview ? (
-        <section className="flex flex-col gap-2 rounded border border-zinc-200 p-4">
-          <h2 className="text-lg font-medium">Récapitulatif</h2>
-          {preview.status === "A_CONSULTER" ? (
-            <p className="text-amber-600">
-              Cette configuration dépasse 40 kg ({preview.totalWeightKg.toFixed(2)} kg) :
-              nous devons vous consulter pour le transport. Votre configuration sera
-              conservée et notre service client vous recontactera.
-            </p>
-          ) : (
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:w-80">
-              <dt>Sous-total</dt>
-              <dd className="text-right">{formatEUR(preview.subtotal)}</dd>
-              {preview.discountAmount > 0 ? (
-                <>
-                  <dt>Remise</dt>
-                  <dd className="text-right">− {formatEUR(preview.discountAmount)}</dd>
-                </>
-              ) : null}
-              <dt>Transport</dt>
-              <dd className="text-right">{formatEUR(preview.shippingCost ?? 0)}</dd>
-              <dt className="font-medium">Total HT</dt>
-              <dd className="text-right font-medium">{formatEUR(preview.totalHT ?? 0)}</dd>
-              <dt>TVA (20 %)</dt>
-              <dd className="text-right">{formatEUR(preview.taxAmount ?? 0)}</dd>
-              <dt className="font-semibold">Total TTC</dt>
-              <dd className="text-right font-semibold">{formatEUR(preview.totalTTC ?? 0)}</dd>
-            </dl>
-          )}
-          <p className="text-xs text-zinc-500">
-            Validité 1 mois · Délai 2 à 3 semaines.
-          </p>
-          {submitError ? <p className="text-sm text-red-600">{submitError}</p> : null}
+      <div className="mt-8 flex items-center justify-between gap-4">
+        {currentStep > 0 ? (
+          <button
+            onClick={prevStep}
+            className="rounded border-2 border-zinc-300 px-6 py-3 text-sm font-bold text-zinc-700 transition hover:border-zinc-400 hover:bg-zinc-50"
+          >
+            ← Retour
+          </button>
+        ) : (
+          <div />
+        )}
+        {currentStep === STEPS.length - 1 ? (
           <button
             onClick={submitQuote}
-            disabled={submitting}
-            className="mt-2 self-start rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark disabled:opacity-50"
+            disabled={submitting || preview?.status === "A_CONSULTER"}
+            className="rounded bg-brand-yellow px-8 py-3 text-sm font-bold text-brand-black transition hover:bg-brand-yellow-dark disabled:opacity-50"
           >
             {submitting ? "Génération…" : "Valider le devis"}
           </button>
-        </section>
-      ) : null}
+        ) : (
+          <button
+            onClick={nextStep}
+            disabled={!canAdvanceStep()}
+            className="rounded bg-brand-yellow px-8 py-3 text-sm font-bold text-brand-black transition hover:bg-brand-yellow-dark disabled:opacity-50"
+          >
+            Suivant →
+          </button>
+        )}
+      </div>
     </main>
   );
 }
