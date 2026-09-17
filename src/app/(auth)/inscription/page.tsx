@@ -33,7 +33,7 @@ export default function InscriptionPage() {
     return (
       <main className="mx-auto flex max-w-md flex-1 flex-col justify-center gap-4 px-6 py-24">
         <h1 className="text-2xl font-semibold">Vérifiez votre boîte mail</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600">
           Un e-mail de vérification vous a été envoyé. Le lien est valable 24 h.
           Une fois votre adresse vérifiée, votre compte devra encore être
           approuvé par un administrateur avant d&apos;accéder au configurateur.
@@ -56,7 +56,7 @@ export default function InscriptionPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -67,7 +67,7 @@ export default function InscriptionPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -75,7 +75,7 @@ export default function InscriptionPage() {
           <input
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -83,19 +83,19 @@ export default function InscriptionPage() {
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button
           type="submit"
           disabled={status === "loading"}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+          className="rounded bg-brand-yellow px-4 py-2 font-bold text-brand-black hover:bg-brand-yellow-dark disabled:opacity-50"
         >
           {status === "loading" ? "Envoi…" : "Créer mon compte"}
         </button>
       </form>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-zinc-600">
         Déjà inscrit ?{" "}
         <Link href="/connexion" className="font-medium underline">
           Se connecter

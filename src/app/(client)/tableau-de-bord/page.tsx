@@ -23,20 +23,20 @@ export default async function TableauDeBordPage() {
         <h1 className="text-2xl font-semibold">Vos devis</h1>
         <Link
           href="/configurateur"
-          className="rounded bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+          className="rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark"
         >
           Nouveau devis
         </Link>
       </div>
 
       {quotes.length === 0 ? (
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600">
           Vous n&apos;avez pas encore de devis.
         </p>
       ) : (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-800">
+            <tr className="border-b border-zinc-200">
               <th className="py-2">Référence</th>
               <th className="py-2">Statut</th>
               <th className="py-2">Total TTC</th>
@@ -46,7 +46,7 @@ export default async function TableauDeBordPage() {
           </thead>
           <tbody>
             {quotes.map((quote) => (
-              <tr key={quote.id} className="border-b border-zinc-100 dark:border-zinc-900">
+              <tr key={quote.id} className="border-b border-zinc-100">
                 <td className="py-2">{quote.reference}</td>
                 <td className="py-2">{STATUS_LABELS[quote.status] ?? quote.status}</td>
                 <td className="py-2">{quote.total ? formatEUR(Number(quote.total)) : "—"}</td>

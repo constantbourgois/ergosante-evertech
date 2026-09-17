@@ -41,7 +41,7 @@ function VerifierEmailContent() {
     return (
       <>
         <h1 className="text-2xl font-semibold">Adresse vérifiée</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600">
           Votre compte attend maintenant l&apos;approbation d&apos;un
           administrateur. Vous recevrez un e-mail dès qu&apos;il sera activé.
         </p>
@@ -56,7 +56,7 @@ function VerifierEmailContent() {
     return (
       <>
         <h1 className="text-2xl font-semibold">Lien invalide ou expiré</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600">
           Ce lien de vérification n&apos;est plus valable. Demandez-en un
           nouveau ci-dessous.
         </p>
@@ -68,7 +68,7 @@ function VerifierEmailContent() {
   return (
     <>
       <h1 className="text-2xl font-semibold">Vérifiez votre boîte mail</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
+      <p className="text-zinc-600">
         Un e-mail de vérification vous a été envoyé à l&apos;inscription. Vous
         pouvez en demander un nouveau si besoin.
       </p>
@@ -78,7 +78,7 @@ function VerifierEmailContent() {
 
   function renderResendForm() {
     if (resendDone) {
-      return <p className="text-sm text-zinc-600 dark:text-zinc-400">Si un compte existe pour cette adresse, un e-mail a été envoyé.</p>;
+      return <p className="text-sm text-zinc-600">Si un compte existe pour cette adresse, un e-mail a été envoyé.</p>;
     }
     return (
       <div className="flex flex-col gap-2">
@@ -87,11 +87,11 @@ function VerifierEmailContent() {
           placeholder="Votre e-mail"
           value={resendEmail}
           onChange={(e) => setResendEmail(e.target.value)}
-          className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded border-2 border-brand-black px-3 py-2 text-sm focus:border-brand-yellow focus:outline-none"
         />
         <button
           onClick={onResend}
-          className="rounded bg-black px-4 py-2 text-sm text-white dark:bg-white dark:text-black"
+          className="rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark"
         >
           Renvoyer l&apos;e-mail de vérification
         </button>

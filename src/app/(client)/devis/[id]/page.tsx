@@ -27,7 +27,7 @@ export default async function DevisDetailPage({
         {quote.status === "EMIS" ? (
           <a
             href={`/api/quotes/${quote.id}/pdf`}
-            className="rounded bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+            className="rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark"
           >
             Télécharger le PDF
           </a>
@@ -35,7 +35,7 @@ export default async function DevisDetailPage({
       </div>
 
       {quote.status === "A_CONSULTER" ? (
-        <p className="rounded border border-amber-300 bg-amber-50 p-4 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+        <p className="rounded border border-amber-300 bg-amber-50 p-4 text-amber-800">
           Cette configuration dépasse 40 kg ({Number(quote.totalWeightKg).toFixed(2)} kg).
           Notre service client va vous recontacter pour établir ce devis.
         </p>
@@ -43,7 +43,7 @@ export default async function DevisDetailPage({
 
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-zinc-200 dark:border-zinc-800">
+          <tr className="border-b border-zinc-200">
             <th className="py-2">Référence</th>
             <th className="py-2">Dimensions</th>
             <th className="py-2">Qté</th>
@@ -53,7 +53,7 @@ export default async function DevisDetailPage({
         </thead>
         <tbody>
           {quote.lines.map((line) => (
-            <tr key={line.id} className="border-b border-zinc-100 dark:border-zinc-900">
+            <tr key={line.id} className="border-b border-zinc-100">
               <td className="py-2">{line.variantReferenceSnapshot}</td>
               <td className="py-2">
                 {line.lengthCm} × {line.widthCm} cm
@@ -66,7 +66,7 @@ export default async function DevisDetailPage({
           {quote.lines
             .filter((l) => l.hasEdging)
             .map((line) => (
-              <tr key={`${line.id}-chant`} className="border-b border-zinc-100 dark:border-zinc-900">
+              <tr key={`${line.id}-chant`} className="border-b border-zinc-100">
                 <td className="py-2">CHAN01</td>
                 <td className="py-2" colSpan={2}>
                   Chant — {Number(line.edgingLinearMeters).toFixed(2)} ml

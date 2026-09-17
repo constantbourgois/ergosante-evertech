@@ -51,7 +51,7 @@ export default function ChartePage() {
           <input
             value={branding.logoUrl ?? ""}
             onChange={(e) => setBranding({ ...branding, logoUrl: e.target.value || null })}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <div className="grid grid-cols-2 gap-4">
@@ -77,7 +77,7 @@ export default function ChartePage() {
           <textarea
             value={branding.companyAddress}
             onChange={(e) => setBranding({ ...branding, companyAddress: e.target.value })}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -85,7 +85,7 @@ export default function ChartePage() {
           <textarea
             value={branding.legalMentions}
             onChange={(e) => setBranding({ ...branding, legalMentions: e.target.value })}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <div className="grid grid-cols-3 gap-4">
@@ -97,7 +97,7 @@ export default function ChartePage() {
               onChange={(e) =>
                 setBranding({ ...branding, quoteValidityDays: Number(e.target.value) })
               }
-              className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -106,7 +106,7 @@ export default function ChartePage() {
               type="number"
               value={branding.defaultVatRate}
               onChange={(e) => setBranding({ ...branding, defaultVatRate: e.target.value })}
-              className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -114,13 +114,13 @@ export default function ChartePage() {
             <input
               value={branding.leadTimeLabel}
               onChange={(e) => setBranding({ ...branding, leadTimeLabel: e.target.value })}
-              className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
             />
           </label>
         </div>
         <button
           type="submit"
-          className="self-start rounded bg-black px-4 py-2 text-sm text-white dark:bg-white dark:text-black"
+          className="self-start rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark"
         >
           Enregistrer
         </button>

@@ -29,7 +29,7 @@ function ReinitialiserMotDePasseContent() {
   }
 
   if (!token) {
-    return <p className="text-zinc-600 dark:text-zinc-400">Lien invalide.</p>;
+    return <p className="text-zinc-600">Lien invalide.</p>;
   }
 
   if (done) {
@@ -46,13 +46,13 @@ function ReinitialiserMotDePasseContent() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
         />
       </label>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <button
         type="submit"
-        className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+        className="rounded bg-brand-yellow px-4 py-2 font-bold text-brand-black hover:bg-brand-yellow-dark"
       >
         Réinitialiser
       </button>

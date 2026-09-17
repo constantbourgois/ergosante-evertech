@@ -80,8 +80,8 @@ export default function ComptesPage() {
             onClick={() => setStatus(opt.value)}
             className={`rounded-full border px-4 py-1.5 text-sm ${
               status === opt.value
-                ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                : "border-zinc-300 dark:border-zinc-700"
+                ? "border-brand-yellow bg-brand-yellow text-brand-black"
+                : "border-zinc-300"
             }`}
           >
             {opt.label}
@@ -96,7 +96,7 @@ export default function ComptesPage() {
       ) : (
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-800">
+            <tr className="border-b border-zinc-200">
               <th className="py-2">E-mail</th>
               <th className="py-2">Société</th>
               <th className="py-2">Remise</th>
@@ -105,14 +105,14 @@ export default function ComptesPage() {
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id} className="border-b border-zinc-100 dark:border-zinc-900">
+              <tr key={user.id} className="border-b border-zinc-100">
                 <td className="py-2">{user.email}</td>
                 <td className="py-2">{user.companyName ?? "—"}</td>
                 <td className="py-2">
                   <select
                     value={user.discountRateId ?? ""}
                     onChange={(e) => setDiscount(user.id, e.target.value || null)}
-                    className="rounded border border-zinc-300 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="rounded border-2 border-brand-black px-2 py-1 focus:border-brand-yellow focus:outline-none"
                   >
                     <option value="">Aucune</option>
                     {discounts.map((d) => (
@@ -127,7 +127,7 @@ export default function ComptesPage() {
                     <>
                       <button
                         onClick={() => act(user.id, "approve")}
-                        className="rounded bg-black px-3 py-1 text-white dark:bg-white dark:text-black"
+                        className="rounded bg-brand-yellow px-3 py-1 font-bold text-brand-black hover:bg-brand-yellow-dark"
                       >
                         Approuver
                       </button>

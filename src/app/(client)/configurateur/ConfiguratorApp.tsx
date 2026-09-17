@@ -175,8 +175,8 @@ export default function ConfiguratorApp() {
               }}
               className={`rounded-full border px-4 py-1.5 text-sm ${
                 workstationType === type
-                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                  : "border-zinc-300 dark:border-zinc-700"
+                  ? "border-brand-yellow bg-brand-yellow text-brand-black"
+                  : "border-zinc-300"
               }`}
             >
               {WORKSTATION_LABELS[type]}
@@ -196,8 +196,8 @@ export default function ConfiguratorApp() {
                   onClick={() => setSelectedFamilyId(family.id)}
                   className={`flex flex-col gap-1 rounded border px-4 py-3 text-left text-sm ${
                     family.id === selectedFamilyId
-                      ? "border-black dark:border-white"
-                      : "border-zinc-300 dark:border-zinc-700"
+                      ? "border-brand-yellow"
+                      : "border-zinc-300"
                   }`}
                 >
                   <span className="font-medium">
@@ -230,7 +230,7 @@ export default function ConfiguratorApp() {
                     onChange={(e) =>
                       setDraft({ ...draft, quantity: Number(e.target.value) || 1 })
                     }
-                    className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
@@ -242,7 +242,7 @@ export default function ConfiguratorApp() {
                     onChange={(e) =>
                       setDraft({ ...draft, lengthCm: Number(e.target.value) || 0 })
                     }
-                    className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
@@ -255,7 +255,7 @@ export default function ConfiguratorApp() {
                     onChange={(e) =>
                       setDraft({ ...draft, widthCm: Number(e.target.value) || 0 })
                     }
-                    className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
                   />
                 </label>
               </div>
@@ -312,7 +312,7 @@ export default function ConfiguratorApp() {
 
               <button
                 onClick={addLine}
-                className="self-start rounded border border-black px-4 py-2 text-sm font-medium dark:border-white"
+                className="self-start rounded border-2 border-brand-black px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-black hover:text-brand-yellow"
               >
                 Ajouter cette ligne
               </button>
@@ -328,7 +328,7 @@ export default function ConfiguratorApp() {
             {lines.map((line) => (
               <li
                 key={line.key}
-                className="flex items-center justify-between rounded border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-800"
+                className="flex items-center justify-between rounded border border-zinc-200 px-4 py-2 text-sm"
               >
                 <span>
                   {line.familyLabel} — {line.quantity} × {line.lengthCm}×{line.widthCm} cm
@@ -346,7 +346,7 @@ export default function ConfiguratorApp() {
       ) : null}
 
       {preview ? (
-        <section className="flex flex-col gap-2 rounded border border-zinc-200 p-4 dark:border-zinc-800">
+        <section className="flex flex-col gap-2 rounded border border-zinc-200 p-4">
           <h2 className="text-lg font-medium">Récapitulatif</h2>
           {preview.status === "A_CONSULTER" ? (
             <p className="text-amber-600">
@@ -381,7 +381,7 @@ export default function ConfiguratorApp() {
           <button
             onClick={submitQuote}
             disabled={submitting}
-            className="mt-2 self-start rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
+            className="mt-2 self-start rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark disabled:opacity-50"
           >
             {submitting ? "Génération…" : "Valider le devis"}
           </button>

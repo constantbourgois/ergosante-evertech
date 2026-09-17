@@ -65,7 +65,7 @@ export default function TransportPage() {
         « nous consulter ».
       </p>
 
-      <form onSubmit={onSubmit} className="flex items-end gap-3 rounded border border-zinc-200 p-4 dark:border-zinc-800">
+      <form onSubmit={onSubmit} className="flex items-end gap-3 rounded border border-zinc-200 p-4">
         <label className="flex flex-col gap-1 text-sm">
           Poids max (kg)
           <input
@@ -73,7 +73,7 @@ export default function TransportPage() {
             step="0.01"
             value={maxWeightKg || ""}
             onChange={(e) => setMaxWeightKg(Number(e.target.value))}
-            className="w-32 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-32 rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -83,10 +83,10 @@ export default function TransportPage() {
             step="0.01"
             value={flatPrice || ""}
             onChange={(e) => setFlatPrice(Number(e.target.value))}
-            className="w-32 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-32 rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
-        <button type="submit" className="rounded bg-black px-4 py-2 text-sm text-white dark:bg-white dark:text-black">
+        <button type="submit" className="rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark">
           Ajouter la tranche
         </button>
       </form>
@@ -94,7 +94,7 @@ export default function TransportPage() {
 
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-zinc-200 dark:border-zinc-800">
+          <tr className="border-b border-zinc-200">
             <th className="py-2">Jusqu&apos;à</th>
             <th className="py-2">Forfait</th>
             <th className="py-2" />
@@ -102,7 +102,7 @@ export default function TransportPage() {
         </thead>
         <tbody>
           {brackets.map((b) => (
-            <tr key={b.id} className="border-b border-zinc-100 dark:border-zinc-900">
+            <tr key={b.id} className="border-b border-zinc-100">
               <td className="py-2">{b.maxWeightKg} kg</td>
               <td className="py-2">
                 <input
@@ -113,7 +113,7 @@ export default function TransportPage() {
                     const value = Number(e.target.value);
                     if (value > 0 && value !== Number(b.flatPrice)) updateBracket(b.id, value);
                   }}
-                  className="w-24 rounded border border-zinc-300 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                  className="w-24 rounded border-2 border-brand-black px-2 py-1 focus:border-brand-yellow focus:outline-none"
                 />
                 {" €"}
               </td>

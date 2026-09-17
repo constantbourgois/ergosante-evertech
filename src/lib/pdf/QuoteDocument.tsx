@@ -34,6 +34,7 @@ export interface QuoteDocumentProps {
   branding: {
     logoUrl: string | null;
     primaryColor: string;
+    secondaryColor: string;
     companyAddress: string;
     legalMentions: string;
     quoteFooter: string | null;
@@ -67,16 +68,20 @@ function formatDate(date: Date): string {
 }
 
 export function QuoteDocument(props: QuoteDocumentProps) {
+  const { primaryColor, secondaryColor } = props.branding;
   return (
     <Document title={`Devis ${props.reference}`}>
       <Page size="A4" style={styles.page}>
+        <View style={{ height: 6, backgroundColor: primaryColor, marginBottom: 20 }} />
         <View style={styles.header}>
           <View>
             {props.branding.logoUrl ? (
               // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image, pas une balise HTML img
               <Image src={props.branding.logoUrl} style={{ width: 120, marginBottom: 8 }} />
             ) : null}
-            <Text style={styles.title}>Devis {props.reference}</Text>
+            <Text style={[styles.title, { color: primaryColor }]}>
+              Devis {props.reference}
+            </Text>
             <Text style={styles.muted}>Émis le {formatDate(props.createdAt)}</Text>
             <Text style={styles.muted}>Valable jusqu&apos;au {formatDate(props.validUntil)}</Text>
             <Text style={styles.muted}>Délai de livraison : {props.leadTimeLabel}</Text>
@@ -89,7 +94,12 @@ export function QuoteDocument(props: QuoteDocumentProps) {
         </View>
 
         <View style={styles.table}>
-          <View style={styles.headerRow}>
+          <View
+            style={[
+              styles.headerRow,
+              { backgroundColor: secondaryColor, paddingHorizontal: 6 },
+            ]}
+          >
             <Text style={styles.colRef}>Référence</Text>
             <Text style={styles.colDim}>Dimensions</Text>
             <Text style={styles.colQty}>Qté</Text>
@@ -145,7 +155,12 @@ export function QuoteDocument(props: QuoteDocumentProps) {
             <Text>TVA ({props.vatRate} %)</Text>
             <Text>{formatEUR(props.taxAmount)}</Text>
           </View>
-          <View style={[styles.totalRow, { fontWeight: 700, borderTop: "1px solid #333", paddingTop: 4 }]}>
+          <View
+            style={[
+              styles.totalRow,
+              { fontWeight: 700, borderTop: `2px solid ${primaryColor}`, paddingTop: 4 },
+            ]}
+          >
             <Text>Total TTC</Text>
             <Text>{formatEUR(props.totalTTC)}</Text>
           </View>

@@ -44,8 +44,8 @@ export async function PATCH(request: Request) {
       ? await db.brandingSettings.update({ where: { id: existing.id }, data: parsed.data })
       : await db.brandingSettings.create({
           data: {
-            primaryColor: "#0f4c81",
-            secondaryColor: "#e8b923",
+            primaryColor: "#0a0a0a",
+            secondaryColor: "#ffc400",
             fontFamily: "Helvetica",
             companyAddress: "",
             legalMentions: "",

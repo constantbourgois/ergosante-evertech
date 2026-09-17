@@ -82,13 +82,13 @@ export default function CataloguePage() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-10">
       <h1 className="text-2xl font-semibold">Catalogue</h1>
 
-      <form onSubmit={onImport} className="flex items-center gap-3 rounded border border-zinc-200 p-4 text-sm dark:border-zinc-800">
+      <form onSubmit={onImport} className="flex items-center gap-3 rounded border border-zinc-200 p-4 text-sm">
         <input
           type="file"
           accept=".xlsx"
           onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
         />
-        <button type="submit" className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black">
+        <button type="submit" className="rounded bg-brand-yellow px-4 py-2 font-bold text-brand-black hover:bg-brand-yellow-dark">
           Importer le tarif (xlsx)
         </button>
         {importResult ? <span>{importResult}</span> : null}
@@ -98,7 +98,7 @@ export default function CataloguePage() {
         <p>Chargement…</p>
       ) : (
         families.map((family) => (
-          <section key={family.id} className="flex flex-col gap-3 rounded border border-zinc-200 p-4 dark:border-zinc-800">
+          <section key={family.id} className="flex flex-col gap-3 rounded border border-zinc-200 p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-medium">
                 {family.name} ({family.code}) — {family.workstationType}
@@ -127,7 +127,7 @@ export default function CataloguePage() {
             ) : (
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800">
+                  <tr className="border-b border-zinc-200">
                     <th className="py-1">Référence</th>
                     <th className="py-1">Unité</th>
                     <th className="py-1">Prix</th>
@@ -137,7 +137,7 @@ export default function CataloguePage() {
                 </thead>
                 <tbody>
                   {family.variants.map((variant) => (
-                    <tr key={variant.id} className="border-b border-zinc-100 dark:border-zinc-900">
+                    <tr key={variant.id} className="border-b border-zinc-100">
                       <td className="py-1">{variant.reference}</td>
                       <td className="py-1">{variant.salesUnit}</td>
                       <td className="py-1">
@@ -151,7 +151,7 @@ export default function CataloguePage() {
                               updateVariant(variant.id, { salePrice: value });
                             }
                           }}
-                          className="w-24 rounded border border-zinc-300 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                          className="w-24 rounded border-2 border-brand-black px-2 py-1 focus:border-brand-yellow focus:outline-none"
                         />
                       </td>
                       <td className="py-1">{variant.weight}</td>

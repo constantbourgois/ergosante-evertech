@@ -63,7 +63,7 @@ function ConnexionForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -73,19 +73,19 @@ function ConnexionForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+          className="rounded bg-brand-yellow px-4 py-2 font-bold text-brand-black hover:bg-brand-yellow-dark disabled:opacity-50"
         >
           {loading ? "Connexion…" : "Se connecter"}
         </button>
       </form>
-      <div className="flex justify-between text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="flex justify-between text-sm text-zinc-600">
         <Link href="/inscription" className="font-medium underline">
           Créer un compte
         </Link>

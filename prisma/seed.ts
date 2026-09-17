@@ -374,8 +374,8 @@ async function main() {
   if (brandingCount === 0) {
     await db.brandingSettings.create({
       data: {
-        primaryColor: "#0f4c81",
-        secondaryColor: "#e8b923",
+        primaryColor: "#0a0a0a",
+        secondaryColor: "#ffc400",
         fontFamily: "Helvetica",
         companyAddress: "Evertech SAS — adresse à renseigner",
         legalMentions:

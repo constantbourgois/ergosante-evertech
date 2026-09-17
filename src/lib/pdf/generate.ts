@@ -58,7 +58,8 @@ export async function renderQuotePdf(quoteId: string): Promise<Buffer> {
     totalTTC: Number(quote.total ?? 0),
     branding: {
       logoUrl: branding?.logoUrl ?? null,
-      primaryColor: branding?.primaryColor ?? "#0f4c81",
+      primaryColor: branding?.primaryColor ?? "#0a0a0a",
+      secondaryColor: branding?.secondaryColor ?? "#ffc400",
       companyAddress: branding?.companyAddress ?? "",
       legalMentions: branding?.legalMentions ?? "",
       quoteFooter: branding?.quoteFooter ?? null,

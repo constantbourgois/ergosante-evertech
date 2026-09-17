@@ -48,7 +48,7 @@ export default function AdminDevisPage() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded border-2 border-brand-black px-3 py-2 text-sm focus:border-brand-yellow focus:outline-none"
         >
           <option value="">Tous les statuts</option>
           {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -62,16 +62,16 @@ export default function AdminDevisPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && refresh()}
-          className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded border-2 border-brand-black px-3 py-2 text-sm focus:border-brand-yellow focus:outline-none"
         />
-        <button onClick={refresh} className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700">
+        <button onClick={refresh} className="rounded border border-zinc-300 px-3 py-2 text-sm">
           Filtrer
         </button>
       </div>
 
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-zinc-200 dark:border-zinc-800">
+          <tr className="border-b border-zinc-200">
             <th className="py-2">Référence</th>
             <th className="py-2">Client</th>
             <th className="py-2">Statut</th>
@@ -84,8 +84,8 @@ export default function AdminDevisPage() {
           {quotes.map((q) => (
             <tr
               key={q.id}
-              className={`border-b border-zinc-100 dark:border-zinc-900 ${
-                q.status === "A_CONSULTER" ? "bg-amber-50 dark:bg-amber-950/40" : ""
+              className={`border-b border-zinc-100 ${
+                q.status === "A_CONSULTER" ? "bg-amber-50/40" : ""
               }`}
             >
               <td className="py-2">{q.reference}</td>

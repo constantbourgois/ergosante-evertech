@@ -20,7 +20,7 @@ export default function MotDePasseOubliePage() {
     <main className="mx-auto flex max-w-md flex-1 flex-col justify-center gap-6 px-6 py-24">
       <h1 className="text-2xl font-semibold">Mot de passe oublié</h1>
       {done ? (
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600">
           Si un compte existe pour cette adresse, un e-mail de réinitialisation
           vient d&apos;être envoyé.
         </p>
@@ -33,12 +33,12 @@ export default function MotDePasseOubliePage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
             />
           </label>
           <button
             type="submit"
-            className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+            className="rounded bg-brand-yellow px-4 py-2 font-bold text-brand-black hover:bg-brand-yellow-dark"
           >
             Envoyer le lien de réinitialisation
           </button>

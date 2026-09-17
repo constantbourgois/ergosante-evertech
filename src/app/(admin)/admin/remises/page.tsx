@@ -60,14 +60,14 @@ export default function RemisesPage() {
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-10">
       <h1 className="text-2xl font-semibold">Remises</h1>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded border border-zinc-200 p-4 dark:border-zinc-800">
+      <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded border border-zinc-200 p-4">
         <label className="flex flex-col gap-1 text-sm">
           Nom
           <input
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -78,7 +78,7 @@ export default function RemisesPage() {
             max={100}
             value={percentage}
             onChange={(e) => setPercentage(Number(e.target.value))}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border-2 border-brand-black px-3 py-2 focus:border-brand-yellow focus:outline-none"
           />
         </label>
         <label className="flex items-center gap-2 text-sm">
@@ -90,14 +90,14 @@ export default function RemisesPage() {
           S&apos;applique aussi au transport
         </label>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button type="submit" className="self-start rounded bg-black px-4 py-2 text-sm text-white dark:bg-white dark:text-black">
+        <button type="submit" className="self-start rounded bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-black hover:bg-brand-yellow-dark">
           Ajouter
         </button>
       </form>
 
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-zinc-200 dark:border-zinc-800">
+          <tr className="border-b border-zinc-200">
             <th className="py-2">Nom</th>
             <th className="py-2">Taux</th>
             <th className="py-2">Transport</th>
@@ -106,7 +106,7 @@ export default function RemisesPage() {
         </thead>
         <tbody>
           {discounts.map((d) => (
-            <tr key={d.id} className="border-b border-zinc-100 dark:border-zinc-900">
+            <tr key={d.id} className="border-b border-zinc-100">
               <td className="py-2">{d.name}</td>
               <td className="py-2">{d.percentage} %</td>
               <td className="py-2">{d.appliesToTransport ? "Oui" : "Non"}</td>
