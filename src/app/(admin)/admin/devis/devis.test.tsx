@@ -32,7 +32,8 @@ const mockQuotes = [
 
 describe("AdminDevisPage (Devis Management)", () => {
   beforeEach(() => {
-    global.fetch = vi.fn((url: string) => {
+    global.fetch = vi.fn((input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
       const urlObj = new URL(url, "http://localhost");
       const status = urlObj.searchParams.get("status");
       const email = urlObj.searchParams.get("email");

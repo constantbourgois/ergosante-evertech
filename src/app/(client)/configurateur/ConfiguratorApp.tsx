@@ -20,15 +20,15 @@ const WORKSTATION_ORDER: WorkstationType[] = [
   "MILIEU_HUMIDE",
 ];
 
-const STEPS = [
+type StepId = 0 | 1 | 2 | 3 | 4;
+
+const STEPS: Array<{ id: StepId; label: string }> = [
   { id: 0, label: "Type de poste" },
   { id: 1, label: "Modèle" },
   { id: 2, label: "Configuration" },
   { id: 3, label: "Résumé" },
   { id: 4, label: "Aperçu" },
-] as const;
-
-type StepId = typeof STEPS[number]["id"];
+];
 
 function newLineDraft(family: CatalogFamily): DraftLine {
   return {
